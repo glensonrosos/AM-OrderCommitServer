@@ -4,6 +4,11 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 
 import purchaseOrderRoutes from './routes/purchaseOrder.js';
+import buyerRoutes from './routes/buyer.js';
+import statusRoutes from './routes/status.js';
+import departmentRoutes from './routes/department.js';
+import orderItemRoutes from './routes/orderItem.js';
+import authRoutes from './routes/auth.js'
 
 const app = express();
 
@@ -22,4 +27,14 @@ mongoose.connect(CONNECTION_URL,{useNewUrlParser:true, useUnifiedTopology:true})
     .then(()=> app.listen(PORT,() => console.log(`Server running on port: ${PORT}`)))
     .catch((error) => console.log(error.message));
 
-app.use('/purchaseOrder',purchaseOrderRoutes);
+
+app.use('/oc/purchaseOrders',purchaseOrderRoutes);
+app.use('/oc/buyers',buyerRoutes);
+app.use('/oc/status',statusRoutes);
+app.use('/oc/departments',departmentRoutes);
+app.use('/oc/orderItems',orderItemRoutes);
+app.use('/oc/auth',authRoutes);
+
+
+// DOCKER
+//https://www.youtube.com/watch?v=rOTqprHv1YE
