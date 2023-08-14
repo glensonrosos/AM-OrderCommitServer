@@ -1,9 +1,10 @@
 import express from 'express';
 
-import { getPurchaseOrders,getPurchaseOrder, createPurchaseOrder,updatePurchaseOrderByAM,updatePurchaseOrderByLogistics} from '../controllers/purchaseOrder.js'
+import { getPurchaseOrders,getPurchaseOrder,getPurchaseOrdersBySearch,createPurchaseOrder,updatePurchaseOrderByAM,updatePurchaseOrderByLogistics} from '../controllers/purchaseOrder.js'
 
 const router = express.Router();
 
+router.get('/search',getPurchaseOrdersBySearch);
 router.get('/',getPurchaseOrders);
 router.post('/',createPurchaseOrder);
 router.get('/:id',getPurchaseOrder);

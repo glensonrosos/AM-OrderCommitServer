@@ -1,13 +1,104 @@
 import PurchaseOrder from "../models/purchaseOrder.js";
 import mongoose from "mongoose";
+import moment from 'moment';
 
 export const getPurchaseOrders = async (req,res)=>{
+    const {page} = req.query;
     try{
-        const purchaseOrders = await PurchaseOrder.find();
 
-        console.log(purchaseOrders);
+        const LIMIT = 3 ;
+        //get the starting index of evert page;
+        const startIndex = ( Number(page)-1 ) * LIMIT;
+        const total = await PurchaseOrder.countDocuments({});
 
-        res.status(200).json(purchaseOrders);
+        const data = await PurchaseOrder.find().sort({ _id: -1}).limit(LIMIT).skip(startIndex);
+
+        res.status(200).json({purchaseOrders: data, 
+            currentPage:(Number(page)), numberOfPages:Math.ceil(total/ LIMIT) });
+    }catch(error){
+        res.status(404).json({message: error.message});
+    }
+}
+
+// Query =>    /posts?page=1    page=1
+// Params =>    /post/123sfs    id=123sfs
+
+export const getPurchaseOrdersBySearch = async (req,res)=>{
+    try{
+        const {option,value} = req.query;
+
+        let purchaseOrders = [];
+
+        if(option === 'shipDate' || option === 'dateIssued'){
+            //DATE
+
+            if(value.split('-').length > 1){
+
+                let dateFrom = null;
+                let dateTo = null;
+
+                dateFrom = value.split('-')[0] || null;
+                dateTo = value.split('-')[1] || null;
+
+                dateFrom = await moment(dateFrom,'MM/DD/YYYY').startOf('day');
+                dateTo = await moment(dateTo,'MM/DD/YYYY').endOf('day');
+                // DATE RANGE
+
+                console.log('called date range');
+
+                purchaseOrders = await PurchaseOrder.find({
+                    [option]:{
+                        $gte: dateFrom,
+                        $lte: dateTo
+                    }
+                });
+            
+            }else{
+
+                // SINGLE DATE
+                const value1 = await moment(value,'MM/DD/YYYY').startOf('day');
+                const value2 = await moment(value,'MM/DD/YYYY').endOf('day');
+                
+                purchaseOrders = await PurchaseOrder.find({
+                    [option]:{
+                        $gte: value1,
+                        $lte: value2
+                    }
+                });
+            }
+        }
+        else if(option === 'buyer'){
+
+            console.log(`${option} => ${value} BUYER ARRAY`);
+
+            // ARRAY
+            purchaseOrders = await PurchaseOrder.find({
+                'buyer.buyer' :{ $in : value.toUpperCase().split(',')  }
+            });
+        }else if(option === 'status'){
+            console.log(`${option} => ${value} STATUS ARRAY`);
+            // ARRAY
+            purchaseOrders = await PurchaseOrder.find({
+                'status.status' :{ $in : value.toUpperCase().split(',')  }
+            });
+        }
+        else if(option === 'reqAttDepts'){
+            console.log(`${option} => ${value} REQATTDEPTS ARRAY`);
+            // ARRAY
+            purchaseOrders = await PurchaseOrder.find({
+                'reqAttDepts.department' :{ $in : value.toUpperCase().split(',')  }
+            });
+        }
+        else{
+            console.log(`${option} => ${value} STRING PO ARRAY`);
+            // STRING
+            purchaseOrders = await PurchaseOrder.find({[option]:{ $regex: value}});
+
+            //{name: new RegExp('^'+name+'$', "i")}
+        }   
+        
+        res.status(200).json(purchaseOrders); 
+
     }catch(error){
         res.status(404).json({message: error.message});
     }
@@ -91,8 +182,6 @@ export const updatePurchaseOrderByAM = async (req,res) =>{
     const updatedPurchaseOrder = await PurchaseOrder.
         findByIdAndUpdate(_id,{dateIssued,buyer,poNumber,shipDate,status,reqAttDepts,remarks,_id},{new:true});
 
-    console.log(updatedPurchaseOrder);
-
     res.json(updatedPurchaseOrder);
 }
 
@@ -110,8 +199,6 @@ export const updatePurchaseOrderByLogistics = async (req,res) =>{
                 requiredShipDate: logRequiredShipDate,
                 requestedShipDate: logRequestedShipDate
             },_id},{new:true});
-
-    console.log(updatedPurchaseOrder);
 
     res.json(updatedPurchaseOrder);
 }

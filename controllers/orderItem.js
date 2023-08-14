@@ -71,6 +71,25 @@ export const updateCellOrderItem = async (req,res) =>{
    }
 }
 
+export const updateCellOrderItemImage = async (req,res) =>{
+    
+    const { id:_id } = req.params;
+    const {image} = req.body;
+
+   try{
+        if(!mongoose.Types.ObjectId.isValid(_id))
+        return res.status(404).send('no order item with that id');
+
+        const updatedOrderItem = await OrderItem.
+            findByIdAndUpdate(_id,{image},{new:true});
+
+        res.json(updatedOrderItem);
+
+   }catch(error){
+        res.status(404).json({message: error.message})
+   }
+}
+
 
 
 export const deleteOrderItem = async (req,res) =>{
