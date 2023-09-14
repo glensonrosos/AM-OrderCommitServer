@@ -106,3 +106,77 @@ export const deleteOrderItem = async (req,res) =>{
         res.status(409).json({message:error});
     }
 }
+
+export const getCountOrderItemStatusOpen = async (req,res) =>{
+    const {id} = req.params;
+    try{
+        if(!mongoose.Types.ObjectId.isValid(id))
+            return res.status(404).send('no order item with that id');
+
+
+        //count order details if greater to
+        const totalCount = await OrderItem.find({poNumberId:id}).countDocuments();
+        //get itemCode == null  = 3
+        const getNull = await OrderItem.find({
+            $and:[
+                {poNumberId:id},
+                {itemCode:{$eq:null}}
+            ]}).countDocuments();
+        
+        if(getNull === totalCount)
+            return res.status(203).json({department:"AM"});
+
+        const statusPD = await OrderItem.find({
+            $and:[
+                {poNumberId:id},
+                {firstOrder:true}
+            ],
+            $or:[
+                {patternReleasing:null},
+                {productSpecs:null},
+                {packagingSpecs:null},
+            ]
+            }).countDocuments();
+        if(statusPD !== 0)
+            return res.status(203).json({department:"PD"});
+
+        const statusPU = await OrderItem.find({
+            poNumberId:id,
+            $or:[
+                {completionCarcass:null},
+                {completionArtwork:null},
+                {completionPackagingMaterial:null},
+            ]
+            }).countDocuments();
+
+        if(statusPU !== 0)
+            return res.status(203).json({department:"PU"});
+        
+        const statusPROD = await OrderItem.find({
+            poNumberId:id,
+            $or:[
+                {carcass:null},
+                {artwork:null},
+                {packagingMaterial:null},
+                {crd:null},
+            ]
+            }).countDocuments();
+        if(statusPROD !== 0)
+            return res.status(203).json({department:"PROD"});
+        
+        const statusQA = await OrderItem.find({
+            poNumberId:id,
+            $or:[
+                {poptDate:null},
+                {psiDate:null},
+            ]
+            }).countDocuments();
+        if(statusQA !== 0)
+            return res.status(203).json({department:"QA"});
+        else
+            return res.status(203).json({department:"LOGS"});
+    }catch(error){
+        res.status(409).json({message:error});
+    }
+}
+

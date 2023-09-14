@@ -19,8 +19,8 @@ const userSchema = mongoose.Schema({
     },
     role:Number,
     department:{
-        department: String,
-        _id: mongoose.Types.ObjectId
+        _id: mongoose.Types.ObjectId,
+        department: String
     }
 });
 

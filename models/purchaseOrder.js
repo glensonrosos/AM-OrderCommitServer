@@ -25,37 +25,36 @@ const purchaseOrderSchema = mongoose.Schema({
         _id:Schema.Types.ObjectId,
         status:String,
         color:String,
-        code:Number
+        code:Number,
     },
     remarks:String,
+    amCom:{
+        editedBy:String,
+        updatedAt:Date
+    },
     pdCom:{
-        status:String,
-        finish:Date,
-        editedBy:String
+        editedBy:String,
+        updatedAt:Date
     },
     puCom:{
-        status:String,
-        finish:Date,
-        editedBy:String
+        editedBy:String,
+        updatedAt:Date
     },
     prodCom:{
-        status:String,
-        finish:Date,
-        editedBy:String
+        editedBy:String,
+        updatedAt:Date
     },
     qaCom:{
-        status:String,
-        finish:Date,
-        editedBy:String
+        editedBy:String,
+        updatedAt:Date
     },
     logCom:{
-        status:String,
-        finish:Date,
         editedBy:String,
         requiredShipDate:Date,
-        requestedShipDate:Date
+        requestedShipDate:Date,
+        updatedAt:Date
     },
-
+    editedBy:String,
 });
 
 const PurchaseOrder = mongoose.model('PurchaseOrder',purchaseOrderSchema);
