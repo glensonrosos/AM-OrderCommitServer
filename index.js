@@ -20,7 +20,7 @@ app.use(cors());
 
 
 const PORT = process.env.PORT || 5000;
-const CONNECTION_URL = "mongodb://glenson21:glenson21123@localhost:27017/ordercommitment"
+const CONNECTION_URL = "mongodb://localhost:27017"
 
 
 mongoose.connect(CONNECTION_URL,{useNewUrlParser:true, useUnifiedTopology:true})
