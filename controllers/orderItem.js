@@ -140,12 +140,38 @@ export const getCountOrderItemStatusOpen = async (req,res) =>{
         if(statusPD !== 0)
             return res.status(203).json({department:"PD"});
 
+        const statusPDMold = await OrderItem.find({
+            $and:[
+                {puMoldAvailability:0}
+            ],
+            $or:[
+                {pdMoldAvailability:null},
+            ]
+            }).countDocuments();
+
+        if(statusPDMold !== 0)
+            return res.status(203).json({department:"PD"});
+
+        const statusPDSample = await OrderItem.find({
+            $and:[
+                {qaSampleReference:0}
+            ],
+            $or:[
+                {pdSampleReference:null},
+            ]
+            }).countDocuments();
+
+        if(statusPDSample !== 0)
+            return res.status(203).json({department:"PD"});
+
+
         const statusPU = await OrderItem.find({
             poNumberId:id,
             $or:[
                 {completionCarcass:null},
                 {completionArtwork:null},
                 {completionPackagingMaterial:null},
+                {puMoldAvailability:-1},    //glenson change
             ]
             }).countDocuments();
 
@@ -158,7 +184,6 @@ export const getCountOrderItemStatusOpen = async (req,res) =>{
                 {carcass:null},
                 {artwork:null},
                 {packagingMaterial:null},
-                {crd:null},
             ]
             }).countDocuments();
         if(statusPROD !== 0)
@@ -167,7 +192,7 @@ export const getCountOrderItemStatusOpen = async (req,res) =>{
         const statusQA = await OrderItem.find({
             poNumberId:id,
             $or:[
-                {poptDate:null},
+                {qaSampleReference:-1},
                 {psiDate:null},
             ]
             }).countDocuments();
