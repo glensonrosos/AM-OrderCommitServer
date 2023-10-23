@@ -9,6 +9,7 @@ const orderItemSchema = mongoose.Schema({
     description:String,
     qty:Number,
     firstOrder:Boolean,
+    amArtwork:Number,
     patternReleasing:Date,
     productSpecs:Date,
     packagingSpecs:Date,

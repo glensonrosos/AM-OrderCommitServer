@@ -120,12 +120,20 @@ export const getCountOrderItemStatusOpen = async (req,res) =>{
         const getNull = await OrderItem.find({
             $and:[
                 {poNumberId:id},
-                {itemCode:{$eq:null}}
+                {itemCode:null},
             ]}).countDocuments();
-        
-        if(getNull === totalCount)
-            return res.status(203).json({department:"AM"});
 
+        console.log(`--department:"AM" ${getNull} | ${parseInt(totalCount)}`);
+
+        if(parseInt(getNull) === 0 && parseInt(totalCount) === 0){
+            console.log('--1department:"AM"');
+            return res.status(203).json({department:"AM"});
+        }
+        if(parseInt(getNull) > 0){
+            console.log('--2department:"AM"');
+            return res.status(203).json({department:"AM"});
+        }
+        
         const statusPD = await OrderItem.find({
             $and:[
                 {poNumberId:id},
@@ -137,11 +145,14 @@ export const getCountOrderItemStatusOpen = async (req,res) =>{
                 {packagingSpecs:null},
             ]
             }).countDocuments();
-        if(statusPD !== 0)
+        if(statusPD !== 0){
+            console.log('--1department:"PD"');
             return res.status(203).json({department:"PD"});
+        }
 
         const statusPDMold = await OrderItem.find({
             $and:[
+                {poNumberId:id},
                 {puMoldAvailability:0}
             ],
             $or:[
@@ -149,11 +160,14 @@ export const getCountOrderItemStatusOpen = async (req,res) =>{
             ]
             }).countDocuments();
 
-        if(statusPDMold !== 0)
+        if(statusPDMold !== 0){
+            console.log(`--2department:"PD" | ${statusPDMold}`);
             return res.status(203).json({department:"PD"});
+        }
 
         const statusPDSample = await OrderItem.find({
             $and:[
+                {poNumberId:id},
                 {qaSampleReference:0}
             ],
             $or:[
@@ -161,33 +175,74 @@ export const getCountOrderItemStatusOpen = async (req,res) =>{
             ]
             }).countDocuments();
 
-        if(statusPDSample !== 0)
+        if(statusPDSample !== 0){
+            console.log('--3department:"PD"');
             return res.status(203).json({department:"PD"});
+        }
 
 
         const statusPU = await OrderItem.find({
             poNumberId:id,
             $or:[
                 {completionCarcass:null},
-                {completionArtwork:null},
+                //{completionArtwork:null},
                 {completionPackagingMaterial:null},
-                {puMoldAvailability:-1},    //glenson change
+                {puMoldAvailability:-1},
             ]
             }).countDocuments();
 
-        if(statusPU !== 0)
+        if(statusPU !== 0){
+            console.log('--department:"PU"');
             return res.status(203).json({department:"PU"});
+        }
         
+        // skip pu artwork
+        const statusPUArtwork = await OrderItem.find({
+            $and:[
+                {poNumberId:id},
+                {amArtwork:1}
+            ],
+            $or:[
+                {completionArtwork:null},
+            ]
+            }).countDocuments();
+
+        if(statusPUArtwork !== 0){
+            console.log('--department:"AM"');
+            return res.status(203).json({department:"PU"});
+        }
+        // skip pu artwork
+
         const statusPROD = await OrderItem.find({
             poNumberId:id,
             $or:[
                 {carcass:null},
-                {artwork:null},
+                //{artwork:null},
                 {packagingMaterial:null},
+                {crd:null},
             ]
             }).countDocuments();
-        if(statusPROD !== 0)
+        if(statusPROD !== 0){
+            console.log('--department:"PROD"');
             return res.status(203).json({department:"PROD"});
+        }
+
+        // skip prod artwork
+        const statusPRODArtwork = await OrderItem.find({
+        $and:[
+            {poNumberId:id},
+            {amArtwork:1}
+        ],
+        $or:[
+            {artwork:null},
+        ]
+        }).countDocuments();
+
+        if(statusPRODArtwork !== 0){
+            console.log('--department:"PROD"');
+            return res.status(203).json({department:"PROD"});
+        }
+        // skip prod artwork
         
         const statusQA = await OrderItem.find({
             poNumberId:id,
@@ -196,10 +251,14 @@ export const getCountOrderItemStatusOpen = async (req,res) =>{
                 {psiDate:null},
             ]
             }).countDocuments();
-        if(statusQA !== 0)
+        if(statusQA !== 0){
+            console.log('--department:"AM"');
             return res.status(203).json({department:"QA"});
-        else
+        }
+        else{
+            console.log('--department:"LOGS"');
             return res.status(203).json({department:"LOGS"});
+        }
     }catch(error){
         res.status(409).json({message:error});
     }

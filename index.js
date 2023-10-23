@@ -20,7 +20,10 @@ app.use(cors());
 
 
 const PORT = process.env.PORT || 5000;
+//mongodb://mongo1:27017,mongo2:27018,mongo3:27019/ordercommitment?replicaSet=rs0
+//MONGO_URI
 const CONNECTION_URL = "mongodb://127.0.0.1:27017/ordercommitment"
+//const CONNECTION_URL = "mongodb://mongo1:27017,mongo2:27018,mongo3:27019/ordercommitment?replicaSet=rs0";
 
 
 mongoose.connect(CONNECTION_URL,{useNewUrlParser:true, useUnifiedTopology:true})
