@@ -123,8 +123,6 @@ export const getCountOrderItemStatusOpen = async (req,res) =>{
                 {itemCode:null},
             ]}).countDocuments();
 
-        console.log(`--department:"AM" ${getNull} | ${parseInt(totalCount)}`);
-
         if(parseInt(getNull) === 0 && parseInt(totalCount) === 0){
             console.log('--1department:"AM"');
             return res.status(203).json({department:"AM"});
@@ -251,11 +249,11 @@ export const getCountOrderItemStatusOpen = async (req,res) =>{
                 {psiDate:null},
             ]
             }).countDocuments();
+
         if(statusQA !== 0){
-            console.log('--department:"AM"');
+            console.log('--department:"QA"');
             return res.status(203).json({department:"QA"});
-        }
-        else{
+        }else{
             console.log('--department:"LOGS"');
             return res.status(203).json({department:"LOGS"});
         }
