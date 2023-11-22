@@ -215,6 +215,10 @@ export const createPurchaseOrder = async (req,res) =>{
 
     const poDetails = req.body;
 
+    const checkExist = await PurchaseOrder.findOne({poNumber:poDetails.poNumber});
+    if(checkExist)
+        return res.status(201).json({message: "PO Number exist"});
+
     const newPo = new PurchaseOrder({
         ...poDetails,
         createdAt: new Date().toISOString(),
@@ -268,7 +272,7 @@ export const createPurchaseOrder = async (req,res) =>{
 
     try{
         await newPo.save();
-        res.status(201).json(newPo);
+        res.status(201).json({po:newPo,message:"success"});
 
     }catch(error){
         res.status(409).json({message:error})
@@ -281,6 +285,14 @@ export const updatePurchaseOrderByAM = async (req,res) =>{
     const { id:_id } = req.params;
     const {dateIssued,buyer,poNumber,shipDate,status,reqAttDepts,remarks,editedBy} = req.body;
     const updatedAt = new Date().toISOString();
+
+    const checkExsit = await PurchaseOrder.findOne({
+        poNumber,
+        _id:{ $ne:_id}
+    });
+    
+    if(checkExsit)
+        return res.status(401).json({message: "PO Number exist"});
 
     if(!mongoose.Types.ObjectId.isValid(_id))
         return res.status(404).send('no purchase order with that id');

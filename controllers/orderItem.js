@@ -265,38 +265,62 @@ export const getCountOrderItemStatusOpen = async (req,res) =>{
 
 export const updateOrderItemInBulk = async (req,res) =>{
     
-    const {ids,column,val} = req.body;
+    const { ids, column, val } = req.body;
     const areAllValidObjectIds = ids.every((id) => mongoose.Types.ObjectId.isValid(id));
-   
-   try{
-        if(!areAllValidObjectIds)
-            return res.status(404).send('no order item with that id');
 
-        // dates
-        let getIdsWithNullValues = null;
-        if(column !== 'puMoldAvailability' || column !== 'qaSampleReference'){
-            getIdsWithNullValues = await OrderItem.find({
-                _id: { $in: ids },
-                [column]: null,
-            },{_id:1});
+    try {
+      if (!areAllValidObjectIds)
+            return res.status(404).send('No order item with that id');
+    
+      let getIdsWithNullValues = null;
+    
+      if(column === 'puMoldAvailability' || column === 'qaSampleReference') {
+        const pdYesNo = await OrderItem.updateMany(
+            { _id: { $in: ids } },
+            { [column]: Number(val) },
+            { new: true }
+          );
+          return res.status(203).json(pdYesNo);
+      }
+    
+      getIdsWithNullValues = await OrderItem.find({
+        _id: { $in: ids },
+        [column]: null,
+      }, { _id: 1 });
+  
+      const updateDates = await OrderItem.updateMany(
+        { _id: { $in: getIdsWithNullValues } },
+        { [column]: val },
+        { new: true }
+      );
+  
+      return res.status(203).json(updateDates);
+    
+    } catch (error) {
+      console.error(error);
+      return res.status(500).send('Internal Server Error');
+    }
+}
 
-            const updateDates = await OrderItem.findByIdAndUpdate(
-                {_id: {$in: getIdsWithNullValues}},
-                {[column]: val},
-                {new:true})
+export const clearDateOrderItemInBulk = async (req,res) =>{
+    
+    const { ids, column } = req.body;
+    const areAllValidObjectIds = ids.every((id) => mongoose.Types.ObjectId.isValid(id));
 
-            return res.status(203).json(updateDates);
-        }
-
-        const updatePdYesNo = await OrderItem.findByIdAndUpdate(
-            {_id: {$in: ids}},
-            {[column]: val},
-            {new:true})
-        
-        return res.status(203).json(updatePdYesNo);
-        // I STOP HERE... GLENOSN
-
-   }catch(error){
-        res.status(404).json({message: error.message})
-   }
+    try {
+      if (!areAllValidObjectIds)
+            return res.status(404).send('No order item with that id');
+    
+      const updateDates = await OrderItem.updateMany(
+        { _id: { $in: ids } },
+        { [column]: null },
+        { new: true }
+      );
+  
+      return res.status(203).json(updateDates);
+    
+    } catch (error) {
+      console.error(error);
+      return res.status(500).send('Internal Server Error');
+    }
 }
