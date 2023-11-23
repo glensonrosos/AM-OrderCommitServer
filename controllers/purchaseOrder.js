@@ -217,7 +217,7 @@ export const createPurchaseOrder = async (req,res) =>{
 
     const checkExist = await PurchaseOrder.findOne({poNumber:poDetails.poNumber});
     if(checkExist)
-        return res.status(201).json({message: "PO Number exist"});
+        return res.status(201).json({message:'PO Number exist'});
 
     const newPo = new PurchaseOrder({
         ...poDetails,
