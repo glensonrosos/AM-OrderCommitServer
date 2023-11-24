@@ -18,6 +18,7 @@ export const getOrderItem = async (req,res)=>{
     }
 }
 
+
 export const getOrderItemForImage = async (req,res)=>{
 
     const {id} = req.params;
@@ -69,6 +70,43 @@ export const updateCellOrderItem = async (req,res) =>{
    }catch(error){
         res.status(404).json({message: error.message})
    }
+}
+
+export const updateCellOrderItemWithItemCode = async (req,res)=>{
+
+    const {id} = req.params;
+    const {itemCode} = req.body;
+
+    try{
+
+        if(!mongoose.Types.ObjectId.isValid(id))
+            return res.status(404).send('no order item with that id');
+
+        const orderItem = await OrderItem.findOne({itemCode},{sort:{_id:-1},itemCode:1,image:1,description:1,amArtwork:1});
+
+        if(!orderItem){
+            const dontExist = await OrderItem.
+            findByIdAndUpdate({_id:id},{
+                itemCode:itemCode,
+                image:null,
+                description:null,
+                amArtwork:1,
+            },{new:true,projection: { image: 0 }});  
+
+            return res.status(201).json({orderItem:dontExist,message:'no order item with that item code'});
+        }
+        const updatedOrderItem = await OrderItem.
+            findByIdAndUpdate({_id:id},{
+                itemCode:orderItem.itemCode,
+                image:orderItem.image,
+                description:orderItem.description,
+                amArtwork:orderItem.amArtwork,
+            },{new:true,projection: { image: 0 }});  
+
+        return res.status(201).json({orderItem:updatedOrderItem,message:"success"});
+    }catch(error){
+        return res.status(404).json({message: error});
+    }
 }
 
 export const updateCellOrderItemImage = async (req,res) =>{
