@@ -286,13 +286,13 @@ export const updatePurchaseOrderByAM = async (req,res) =>{
     const {dateIssued,buyer,poNumber,shipDate,status,reqAttDepts,remarks,editedBy} = req.body;
     const updatedAt = new Date().toISOString();
 
-    const checkExsit = await PurchaseOrder.findOne({
+    const checkExist = await PurchaseOrder.findOne({
         poNumber,
         _id:{ $ne:_id}
     });
-    
-    if(checkExsit)
-        return res.status(401).json({message: "PO Number exist"});
+
+    if(checkExist)
+        return res.status(201).json({message: "PO Number exist"});
 
     if(!mongoose.Types.ObjectId.isValid(_id))
         return res.status(404).send('no purchase order with that id');
@@ -301,7 +301,7 @@ export const updatePurchaseOrderByAM = async (req,res) =>{
         findByIdAndUpdate(_id,{dateIssued,buyer,poNumber,shipDate,status,reqAttDepts,
             remarks,editedBy,updatedAt,'logCom.requiredShipDate':shipDate,_id},{new:true});
 
-    res.json(updatedPurchaseOrder);
+    return res.status(201).json({po:updatedPurchaseOrder,message:"success"});
 }
 
 export const updatePurchaseOrderByAuto = async (req,res) =>{
