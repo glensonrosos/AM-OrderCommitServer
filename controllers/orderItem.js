@@ -18,6 +18,23 @@ export const getOrderItem = async (req,res)=>{
     }
 }
 
+export const getOrderItemImages = async (req,res)=>{
+
+    const {id} = req.params;
+
+    try{
+        // dont include image it will takes 30 seconds to get
+        if(!mongoose.Types.ObjectId.isValid(id))
+            return res.status(404).send('no order item with that id');
+
+        const orderItem = await OrderItem.find({poNumberId:id},{itemCode:1,image:1});
+
+        res.status(200).json(orderItem);
+    }catch(error){
+        res.status(404).json({message: error.message});
+    }
+}
+
 
 export const getOrderItemForImage = async (req,res)=>{
 
@@ -176,13 +193,28 @@ export const getCountOrderItemStatusOpen = async (req,res) =>{
                 {firstOrder:true}
             ],
             $or:[
-                {patternReleasing:null},
+                //{patternReleasing:null},
                 {productSpecs:null},
                 {packagingSpecs:null},
             ]
             }).countDocuments();
         if(statusPD !== 0){
             console.log('--1department:"PD"');
+            return res.status(203).json({department:"PD"});
+        }
+
+        const statusPDPattern = await OrderItem.find({
+            $and:[
+                {poNumberId:id},
+                {puPatternAvailability:0}
+            ],
+            $or:[
+                {patternReleasing:null},
+            ]
+            }).countDocuments();
+
+        if(statusPDPattern !== 0){
+            console.log(`--3department:"PD" | ${statusPDPattern}`);
             return res.status(203).json({department:"PD"});
         }
 
@@ -312,7 +344,7 @@ export const updateOrderItemInBulk = async (req,res) =>{
     
       let getIdsWithNullValues = null;
     
-      if(column === 'puMoldAvailability' || column === 'qaSampleReference') {
+      if(column === 'puPatternAvailability' || column === 'puMoldAvailability' || column === 'qaSampleReference') {
         const pdYesNo = await OrderItem.updateMany(
             { _id: { $in: ids } },
             { [column]: Number(val) },

@@ -21,6 +21,7 @@ const orderItemSchema = mongoose.Schema({
     completionArtwork:Date,
     firstPackagingMaterial:Date,
     completionPackagingMaterial:Date,
+    puPatternAvailability:Number,
     puMoldAvailability:Number,
     carcass:Date,
     artwork:Date,
@@ -34,3 +35,6 @@ const orderItemSchema = mongoose.Schema({
 const OrderItem = mongoose.model('OrderItem',orderItemSchema);
 
 export default OrderItem;
+
+
+// db.orderitems.updateMany({},{$set:{puPatternAvailability:1}})

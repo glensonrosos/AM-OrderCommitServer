@@ -18,16 +18,25 @@ app.use(bodyParser.json({limit:"30mb",extended: true}));
 app.use(bodyParser.urlencoded({limit:"30mb",extended:true}));
 app.use(cors());
 
+// Configure CORS
+app.use(cors({
+    origin: true, // Allow requests from any origin
+    methods: ['GET', 'POST', 'PUT', 'DELETE','PATCH'], // Specify the allowed HTTP methods
+    allowedHeaders: ['Content-Type', 'Authorization'], // Specify the allowed headers
+    credentials: true, // Enable credentials (e.g., cookies, authorization headers)
+  }));
+
+
 
 const PORT = process.env.PORT || 5000;
-//mongodb://mongo1:27017,mongo2:27018,mongo3:27019/ordercommitment?replicaSet=rs0
-//MONGO_URI
-const CONNECTION_URL = "mongodb://127.0.0.1:27017/ordercommitment"
-//const CONNECTION_URL = "mongodb://mongo1:27017,mongo2:27018,mongo3:27019/ordercommitment?replicaSet=rs0";
+const CONNECTION_URL = "mongodb://127.0.0.1:27017/ordercommitment";
+
+//works bellow
+//const CONNECTION_URL = "mongodb://host.docker.internal:27017/ordercommitment";
 
 
 mongoose.connect(CONNECTION_URL,{useNewUrlParser:true, useUnifiedTopology:true})
-    .then(()=> app.listen(PORT,() => console.log(`Server running on port: ${PORT}`)))
+    .then(()=> app.listen(PORT,() => console.log(`Server running on port: ${PORT} !!`)))
     .catch((error) => console.log(error.message));
 
 
